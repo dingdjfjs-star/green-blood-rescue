@@ -102,7 +102,11 @@ Engine.register({
         Rig.set('holmes',t,h1.x,h1.y,'stand',0,false,0.95,0.5);
         drawShadowOf(ctx,Chars.holmes,Rig.at('holmes',t)||h1,{lampX:200});
         Chars.holmes(ctx,h1,{rim:true,t:t});
-        const w1={x:480,y:636,pose:(Engine.subI>=2)?'crouch':'stand',ph:0,flip:false,s:0.9};
+        const crouch=Engine.subI>=2;
+        const w1={x:480,y:636,pose:crouch?'crouch':'stand',
+          poseFrom:crouch?'stand':null,
+          poseK:crouch?clamp((Engine.beatT-Engine.subChangedAt)/0.35,0,1):0,
+          ph:0,flip:false,s:0.9};
         Rig.set('watson',t,w1.x,w1.y,w1.pose,0,false,0.9,0.5);
         drawShadowOf(ctx,Chars.watson,Rig.at('watson',t)||w1,{lampX:200,keepCane:true});
         Chars.watson(ctx,w1,{rim:true});

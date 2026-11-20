@@ -112,7 +112,10 @@ Engine.register({
         const hasFace=Engine.subI>=3;
         lyingFigure(ctx,{x:640,y:P.bedTop,h:230,headRight:true,color:'#080c0a',
           headColor:hasFace?'#0d1411':'rgba(190,190,175,0.8)',blanket:'#101813'});
-        const sh={x:895,y:645,pose:bend?'kneel':'stand',ph:0,flip:true,s:1.08,t:t};
+        const sh={x:895,y:645,pose:bend?'kneel':'stand',
+          poseFrom:bend?'stand':null,
+          poseK:bend?clamp((Engine.beatT-Engine.subChangedAt)/0.35,0,1):0,
+          ph:0,flip:true,s:1.08,t:t};
         Rig.set('shade',t,sh.x,sh.y,sh.pose,0,true,1.08,0.0);
         Chars.shadow(ctx,sh,{});
         const k=bend?ease(Math.min(1,t/1.4)):0;

@@ -119,13 +119,43 @@ Engine.register({
           ctx.fillStyle='rgba(150,230,180,0.25)'; ctx.fillRect(648,542,10,16);
           ctx.fillStyle='rgba(200,150,80,0.30)'; ctx.fillRect(668,542,10,16);
         }else{
+          // 闪回：坎大哈洞穴（波纹+触手剪影+眼睛缓移）
           ctx.fillStyle='#010302'; ctx.fillRect(0,0,1280,720);
           const k=ease(Math.min(1,t/1.2));
           glow(ctx,640,340,420*k,'rgba(40,150,100,$A)',0.10*k);
           ctx.fillStyle='rgba(30,110,80,0.12)';
           ctx.fillRect(0,430,1280,290);
+          // 水面涟漪
+          ctx.lineWidth=1.5;
+          for(let i=0;i<6;i++){
+            const y=438+i*16;
+            ctx.strokeStyle=`rgba(90,200,140,${0.05+0.04*Math.sin(t*2.2+i*1.3)})`;
+            ctx.beginPath();
+            for(let x=0;x<=1280;x+=48){
+              const yy=y+Math.sin(x*0.018+t*1.6+i)*4;
+              x?ctx.lineTo(x,yy):ctx.moveTo(x,yy);
+            }
+            ctx.stroke();
+          }
+          // 水下触手剪影：周期性升起又沉下
+          const tk=Math.pow(Math.max(0,Math.sin(t*0.45)),3);
+          if(tk>0.03){
+            ctx.fillStyle='rgba(1,4,3,0.92)';
+            for(let j=0;j<3;j++){
+              ctx.save();
+              ctx.translate(300+j*260+Math.sin(t*0.6+j*1.7)*50, 445);
+              ctx.rotate((j-1)*0.28);
+              ctx.beginPath();
+              ctx.moveTo(-16*tk,0);
+              ctx.quadraticCurveTo(10*tk,-150*tk*(0.75+j*0.18), 70*tk+j*22,-105*tk);
+              ctx.quadraticCurveTo(30*tk,-45*tk, 18*tk,0);
+              ctx.closePath(); ctx.fill();
+              ctx.restore();
+            }
+          }
+          // 一双人眼：缓缓眨动、轻微追踪
           const blink=0.5+0.5*Math.sin(t*1.4);
-          Fx.eyes(ctx,640,330,3.4,blink);
+          Fx.eyes(ctx,640+Math.sin(t*0.4)*40,330,3.4,blink);
           ctx.fillStyle=`rgba(150,200,170,${0.5*k})`;
           ctx.font='italic 17px Georgia,"Songti SC","SimSun",serif';
           ctx.textAlign='center';

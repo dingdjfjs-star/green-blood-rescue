@@ -80,45 +80,57 @@ function humanoid(ctx,o){
   let lean=(o.lean||0)*h;
   if(pose==='stand'&&o.t!==undefined) lean+=Math.sin(o.t*0.7)*h*0.01; // 站姿重心微移
   const br=(o.t!==undefined)?Math.sin(o.t*1.5)*h*0.006:0;            // 呼吸起伏
-  const hipY=-h*0.52, shY=-h*0.78-br*0.6, headCY=-h*0.875-br, headR=h*0.072;
-  let f1=[-0.09*h,0], f2=[0.09*h,0], hd1=[-0.13*h,-0.40*h], hd2=[0.13*h,-0.40*h];
-  let hip=hipY, footTilt=0;
-  const s=Math.sin(ph);
-  switch(pose){
-    case 'walk':
-      f1=[0.17*h*s, -0.055*h*Math.max(0,s)];
-      f2=[-0.17*h*s, -0.055*h*Math.max(0,-s)];
-      hd1=[0.12*h*Math.sin(ph+Math.PI),-0.40*h];
-      hd2=[0.12*h*Math.sin(ph),-0.40*h];
-      break;
-    case 'point': hd2=[0.46*h,-0.72*h]; break;
-    case 'handout': hd2=[0.30*h,-0.50*h]; break;
-    case 'raise': hd2=[0.18*h,-0.99*h]; break;
-    case 'arm': { // 0=垂手 1=高举 2=平指（影子抬手专用，连续插值）
-      const k=clamp(o.armK||0,0,2);
-      if(k<=1) hd2=[lerp(0.13,0.18,k)*h, lerp(-0.40,-0.99,k)*h];
-      else hd2=[lerp(0.18,0.46,k-1)*h, lerp(-0.99,-0.72,k-1)*h];
-      break;
+  const shY=-h*0.78-br*0.6, headCY=-h*0.875-br, headR=h*0.072;
+  // 姿势关节目标表（poseFrom+poseK 可对两套目标插值，实现姿势过渡）
+  function poseT(p,oo){
+    const r={hip:-h*0.52, f1:[-0.09*h,0], f2:[0.09*h,0], hd1:[-0.13*h,-0.40*h], hd2:[0.13*h,-0.40*h]};
+    const ss=Math.sin(oo.ph||0);
+    switch(p){
+      case 'walk':
+        r.f1=[0.17*h*ss,-0.055*h*Math.max(0,ss)];
+        r.f2=[-0.17*h*ss,-0.055*h*Math.max(0,-ss)];
+        r.hd1=[0.12*h*Math.sin((oo.ph||0)+Math.PI),-0.40*h];
+        r.hd2=[0.12*h*Math.sin(oo.ph||0),-0.40*h];
+        break;
+      case 'point': r.hd2=[0.46*h,-0.72*h]; break;
+      case 'handout': r.hd2=[0.30*h,-0.50*h]; break;
+      case 'raise': r.hd2=[0.18*h,-0.99*h]; break;
+      case 'arm': {
+        const k=clamp(oo.armK||0,0,2);
+        if(k<=1) r.hd2=[lerp(0.13,0.18,k)*h, lerp(-0.40,-0.99,k)*h];
+        else r.hd2=[lerp(0.18,0.46,k-1)*h, lerp(-0.99,-0.72,k-1)*h];
+        break;
+      }
+      case 'work':
+        r.f1=[-0.10*h,0]; r.f2=[0.06*h,0];
+        r.hd1=[0.30*h,-0.48*h]; r.hd2=[0.42*h,-0.46*h];
+        break;
+      case 'sit':
+        r.hip=-0.30*h; r.f1=[0.17*h,0]; r.f2=[0.26*h,0];
+        r.hd1=[-0.10*h,-0.44*h]; r.hd2=[0.16*h,-0.42*h];
+        break;
+      case 'kneel':
+        r.hip=-0.36*h; r.f1=[0.16*h,0]; r.f2=[-0.18*h,-0.02*h];
+        r.hd1=[-0.12*h,-0.30*h]; r.hd2=[0.10*h,-0.30*h];
+        break;
+      case 'crouch':
+        r.hip=-0.34*h; r.f1=[-0.17*h,0]; r.f2=[0.17*h,0];
+        r.hd1=[-0.12*h,-0.30*h]; r.hd2=[0.12*h,-0.30*h];
+        break;
     }
-    case 'work':
-      f1=[-0.10*h,0]; f2=[0.06*h,0];
-      hd1=[0.30*h,-0.48*h]; hd2=[0.42*h,-0.46*h];
-      break;
-    case 'sit':
-      hip=-0.30*h;
-      f1=[0.17*h,0]; f2=[0.26*h,0];
-      hd1=[-0.10*h,-0.44*h]; hd2=[0.16*h,-0.42*h];
-      break;
-    case 'kneel':
-      hip=-0.36*h;
-      f1=[0.16*h,0]; f2=[-0.18*h,-0.02*h];
-      hd1=[-0.12*h,-0.30*h]; hd2=[0.10*h,-0.30*h];
-      break;
-    case 'crouch':
-      hip=-0.34*h;
-      f1=[-0.17*h,0]; f2=[0.17*h,0];
-      hd1=[-0.12*h,-0.30*h]; hd2=[0.12*h,-0.30*h];
-      break;
+    return r;
+  }
+  const T1=poseT(pose,o);
+  let f1=T1.f1, f2=T1.f2, hd1=T1.hd1, hd2=T1.hd2, hip=T1.hip;
+  if(o.poseFrom){ // 姿势过渡：两套关节目标按 poseK（0..1，调用方驱动）插值
+    const T0=poseT(o.poseFrom,o);
+    const pk=ease(clamp(o.poseK||0,0,1));
+    const L=(a,b)=>lerp(a,b,pk);
+    f1=[L(T0.f1[0],T1.f1[0]),L(T0.f1[1],T1.f1[1])];
+    f2=[L(T0.f2[0],T1.f2[0]),L(T0.f2[1],T1.f2[1])];
+    hd1=[L(T0.hd1[0],T1.hd1[0]),L(T0.hd1[1],T1.hd1[1])];
+    hd2=[L(T0.hd2[0],T1.hd2[0]),L(T0.hd2[1],T1.hd2[1])];
+    hip=L(T0.hip,T1.hip);
   }
   // 影子用：更暗更平
   function limb(x1,y1,x2,y2,x3,y3,w){
@@ -177,6 +189,21 @@ function humanoid(ctx,o){
     ctx.quadraticCurveTo(hcx+headR*1.15,headCY+headR*1.1, hcx+headR*0.9,headCY+headR*1.7);
     ctx.lineTo(hcx-headR*0.9,headCY+headR*1.7);
     ctx.quadraticCurveTo(hcx-headR*1.15,headCY+headR*1.1, hcx-headR*1.05,headCY+headR*0.6);
+    ctx.closePath(); ctx.fill();
+  }
+  if(o.collar){ // 军式立领（华生）
+    ctx.beginPath();
+    ctx.rect(shX*1.3-headR*0.85, headCY+headR*0.62, headR*1.7, headR*0.55);
+    ctx.fill();
+  }
+  if(o.scarf){ // 顾问侦探的围巾：颈后飘带随时间摆动
+    const nx=shX*1.3;
+    const ft=(o.t!==undefined)?Math.sin(o.t*2.3)*headR*0.35:0;
+    ctx.beginPath();
+    ctx.moveTo(nx-headR*0.55, headCY+headR*0.8);
+    ctx.quadraticCurveTo(nx-headR*1.5+ft, headCY+headR*1.5, nx-headR*1.15+ft*0.6, shY+h*0.14);
+    ctx.lineTo(nx-headR*0.15, shY+h*0.12);
+    ctx.quadraticCurveTo(nx+headR*0.25, headCY+headR*1.1, nx+headR*0.5, headCY+headR*0.8);
     ctx.closePath(); ctx.fill();
   }
   if(o.cap){ // 扁帽
@@ -320,8 +347,8 @@ function rat(ctx,o){
 
 /* 角色预设 */
 const Chars = {
-  holmes(ctx,snap,o){ humanoid(ctx,{h:280,coatW:1.18,pipe:true,hair:'messy',groundShadow:true,...snap,...o}); },
-  watson(ctx,snap,o){ humanoid(ctx,{h:252,cane:true,coatW:1.0,hair:'short',groundShadow:true,...snap,...o}); },
+  holmes(ctx,snap,o){ humanoid(ctx,{h:280,coatW:1.18,pipe:true,hair:'messy',scarf:true,groundShadow:true,...snap,...o}); },
+  watson(ctx,snap,o){ humanoid(ctx,{h:252,cane:true,coatW:1.0,hair:'short',collar:true,groundShadow:true,...snap,...o}); },
   wiggins(ctx,snap,o){ humanoid(ctx,{h:170,cap:true,coatW:0.85,groundShadow:true,...snap,...o}); },
   prince(ctx,snap,o){ humanoid(ctx,{h:262,coatW:0.78,hair:'long',groundShadow:true,...snap,...o}); },
   rat(ctx,snap,o){ rat(ctx,{h:34,...snap,...o}); },

@@ -52,10 +52,22 @@
 - [x] 修 bug：无字幕节拍不清英文副行残留；浏览器缓存旧 gfx.js（server 加 Cache-Control:no-store + index.html 资源 ?v=26 参数）
 - [x] 修视觉：4-3 血迹终态调亮（bk=1 暗红→可见红），Rache 位置移入镜头可视区
 
-## 下一步（待用户反馈）
-- 用户刷新全片重看：光锥/阴影/呼吸/烟/色调/书写
-- 部署仍卡 api 通道（_deploy git 就绪）——用户网页建仓 30 秒即通，或等恢复
-- 可选后续：B2 姿势过渡插值、B3 角色辨识度、C2 坎大哈升级、导出视频
+## 已完成（v2.8 定稿上线批次，2026-11-21）
+- [x] **部署成功**：dingdjfjs-star/green-blood-rescue（26 文件经 API 通道上传——11-20 后通道已恢复，Pages 已开启）
+- [x] 验证：线上 200 + js/css 抽查 200 + 浏览器实开截图（前情提要卡正常渲染、7 幕注册、配音引擎就绪）
+- [x] 阶段 4 上主页：仓库描述+主页链接已设；主页 README 作品集表插入"绿血的拯救"行（互动网页区顶部）并 update 上传；AGENTS.md 索引行更新已上线状态
+
+## 上线四链接
+- 线上页：https://dingdjfjs-star.github.io/green-blood-rescue/
+- 仓库：https://github.com/dingdjfjs-star/green-blood-rescue
+- 主页作品集：https://github.com/dingdjfjs-star（互动网页区）
+- 本地：启动.bat / 8945（神经声需本地 server.py；线上自动回退本机声，"我的声音"录音按域名隔离）
+
+## 下一步（可选，均未做）
+- 教程（TUTORIAL.md / tutorial/ 交互教学网页）——showcase 流程阶段 1
+- 导出视频（IAB recording 自动播放全片录成 WebM）
+- 画面 B2 姿势过渡插值 / B3 角色辨识度（围巾军装）/ C2 坎大哈闪回升级
+- 用户录音（103 句工作台，暂缓）
 
 ## 未决
 - 无

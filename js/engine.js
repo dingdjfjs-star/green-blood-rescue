@@ -226,7 +226,7 @@ const Engine = {
     }
     if(this.subI<this.subs.length-1){
       AudioSys.stopSpeak();
-      this.subI++; this.startType(); return;
+      this.subI++; this.subChangedAt=this.beatT; this.startType(); return;
     }
     this.nextBeat();
   },
@@ -287,6 +287,7 @@ const Engine = {
     Rig.map={}; // 每个节拍是独立机位，影子历史重置
     this._camKeys=b.cam||null;   // 镜头关键帧 [t, lookX, lookY, zoom]
     this.cam={lx:640,ly:360,z:1};
+    this.subChangedAt=0;         // 行切换时刻（姿势过渡用）
     this.subs=b.subs||[];
     this.subsEn=b.subsEn||[];
     this.subI=0;
@@ -315,6 +316,7 @@ const Engine = {
     if(line){
       const vkey='a'+this.ai+'b'+this.bi+'s'+this.subI;
       this._voicePending=AudioSys.speak(line,null,vkey);
+      this._lastLineHadVoice=!!this._voicePending;
     }
     const nxt=this.subs[this.subI+1];
     if(nxt) AudioSys.prefetch(nxt);   // 预取下一句，神经声播放零延迟
@@ -419,24 +421,25 @@ const Engine = {
       this.$.sub.textContent=line.slice(0,this.typed);
       if(this.typed>=line.length){ this.typing=false; this.paintSubEn(); }
     }
-    // 广告牌自动推进（自动播放模式）
+    // 广告牌自动推进（自动播放模式：有配音读完即过，否则按长度估算）
     if(this.state==='ad'&&this.autoplay){
       const voiceOK=!this._adVoice||AudioSys._voiceDone;
       if(voiceOK){
         this._adT+=dt;
-        const need=6+(this.acts[this.ai].ad.b||'').length/9;
+        const need=this._adVoice?1.2:6+(this.acts[this.ai].ad.b||'').length/9;
         if(this._adT>need) this.closeAd();
       }else{
         this._voiceT=(this._voiceT||0)+dt;
         if(this._voiceT>40) AudioSys._voiceDone=true;
       }
     }
-    // 自动播放（读完一句再进下一句）
+    // 自动播放（有配音：读完 0.9s 即进下一句；无配音：按文本长度节奏）
     if(this.state==='play'&&!this.typing&&this.autoplay&&this.subs.length){
       const voiceOK=!this._voicePending||AudioSys._voiceDone;
       if(voiceOK){
         this._autoT=(this._autoT||0)+dt;
-        if(this._autoT>this.holdNeed()){ this._autoT=0; this.advance(); }
+        const hold=this._lastLineHadVoice?0.9:this.holdNeed();
+        if(this._autoT>hold){ this._autoT=0; this.advance(); }
       }else{
         this._voiceT=(this._voiceT||0)+dt;
         if(this._voiceT>30) AudioSys._voiceDone=true;
