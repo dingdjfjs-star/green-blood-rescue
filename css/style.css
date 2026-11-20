@@ -1,0 +1,114 @@
+html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;
+  font-family:Georgia,"Times New Roman","Songti SC","STSong","SimSun",serif;}
+#stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);}
+#cv{display:block;background:#000;cursor:pointer;}
+
+/* ---- 章节标签 ---- */
+#actLabel{position:absolute;left:18px;top:12px;color:rgba(158,222,183,.55);
+  font-size:15px;letter-spacing:.35em;pointer-events:none;text-shadow:0 0 8px #000;}
+
+/* ---- 控制按钮 ---- */
+#ctrls{position:absolute;right:12px;top:10px;display:flex;gap:8px;}
+#ctrls button{background:rgba(10,20,15,.55);color:rgba(190,235,205,.8);
+  border:1px solid rgba(120,200,160,.25);border-radius:3px;padding:4px 10px;
+  font:13px Georgia,"Songti SC","SimSun",serif;letter-spacing:.12em;cursor:pointer;}
+#ctrls button:hover{background:rgba(30,60,45,.6);color:#d6ffe4;}
+#chapterMenu{position:absolute;right:12px;top:44px;display:none;flex-direction:column;
+  background:rgba(6,12,9,.92);border:1px solid rgba(120,200,160,.3);min-width:170px;z-index:30;}
+#chapterMenu.open{display:flex;}
+#chapterMenu button{text-align:left;background:none;border:none;color:rgba(190,235,205,.85);
+  padding:8px 14px;font:14px Georgia,"Songti SC","SimSun",serif;cursor:pointer;letter-spacing:.1em;}
+#chapterMenu button:hover{background:rgba(50,110,80,.35);}
+#chapterMenu button.locked{color:rgba(120,140,130,.35);cursor:default;}
+#chapterMenu button.now{color:#8affc4;}
+
+/* ---- 配音声源菜单 ---- */
+#voiceMenu{position:absolute;right:12px;top:44px;display:none;flex-direction:column;
+  background:rgba(6,12,9,.96);border:1px solid rgba(120,200,160,.3);min-width:230px;
+  max-height:72vh;overflow-y:auto;z-index:35;}
+#voiceMenu.open{display:flex;}
+#voiceMenu button{text-align:left;background:none;border:none;color:rgba(200,238,212,.9);
+  padding:8px 14px;font:14px Georgia,"Songti SC","SimSun",serif;cursor:pointer;letter-spacing:.06em;}
+#voiceMenu button:hover{background:rgba(50,110,80,.35);color:#d6ffe4;}
+#voiceMenu .vmHead{padding:7px 14px 3px;font-size:12px;letter-spacing:.12em;
+  color:rgba(140,190,160,.6);border-top:1px solid rgba(120,200,160,.12);}
+#voiceMenu .vmHead:first-child{border-top:none;}
+#voiceMenu .vmDim{color:rgba(120,140,130,.4);cursor:default;}
+
+/* ---- 录音工作台 ---- */
+#studio{position:absolute;left:0;right:0;top:0;bottom:0;display:none;align-items:center;
+  justify-content:center;background:rgba(1,4,3,.96);z-index:45;}
+#studio.show{display:flex;}
+#studioBox{width:760px;max-width:92%;background:rgba(8,16,12,.92);
+  border:1px solid rgba(130,230,175,.35);border-radius:4px;padding:34px 40px 26px;
+  box-shadow:0 0 60px rgba(60,200,140,.12);text-align:center;}
+#stTitle{font-size:20px;letter-spacing:.15em;color:#bfe9cd;margin-bottom:22px;}
+#stProg{font-size:14px;color:rgba(150,200,170,.7);letter-spacing:.1em;}
+#stLine{font-size:26px;line-height:1.8;color:#e9e2cb;min-height:96px;display:flex;
+  align-items:center;justify-content:center;padding:0 10px;}
+#stLineEn{font-size:14px;font-style:italic;color:rgba(158,196,172,.65);min-height:22px;margin-bottom:18px;}
+#stStatus{font-size:14px;color:rgba(160,210,180,.8);min-height:22px;margin-bottom:16px;}
+#stStatus.rec{color:#8affc4;animation:pulse 1.2s ease-in-out infinite;}
+#stBtns,#stNav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
+#stBtns button,#stNav button{background:rgba(12,24,18,.7);color:rgba(200,238,212,.9);
+  border:1px solid rgba(130,230,175,.35);border-radius:3px;padding:9px 18px;
+  font:15px Georgia,"Songti SC","SimSun",serif;cursor:pointer;letter-spacing:.08em;}
+#stBtns button:hover,#stNav button:hover{background:rgba(40,90,60,.55);color:#eafff2;}
+#stRec.recording{background:rgba(120,30,30,.6);border-color:rgba(255,120,120,.6);color:#ffd2d2;}
+#stHint{font-size:12px;color:rgba(130,170,145,.55);line-height:1.7;margin-top:10px;}
+
+/* ---- 字幕（中文主行 + 英文副行） ---- */
+#subwrap{position:absolute;left:0;right:0;bottom:22px;display:flex;flex-direction:column;
+  align-items:center;pointer-events:none;}
+#subLine{max-width:76%;text-align:center;font-size:25px;line-height:1.6;letter-spacing:.06em;
+  color:#a8dcb8;text-shadow:0 2px 10px #000,0 0 24px rgba(0,10,4,.9);}
+#subLine.dialog{color:#e9e2cb;}
+#subLine.em{color:#8affc4;font-style:italic;}
+#subLineEn{max-width:82%;text-align:center;font-size:14.5px;line-height:1.45;margin-top:5px;
+  font-style:italic;color:rgba(158,196,172,.72);letter-spacing:.02em;
+  text-shadow:0 1px 8px #000;transition:opacity .5s;min-height:20px;}
+
+/* ---- 片头 UI ---- */
+#titleUI{position:absolute;left:0;right:0;top:0;bottom:0;display:none;
+  flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9%;
+  gap:22px;z-index:20;}
+#titleUI.show{display:flex;}
+#btnStart{background:rgba(8,18,13,.5);color:#bfe9cd;border:1px solid rgba(130,230,175,.5);
+  font-size:24px;letter-spacing:1.2em;text-indent:1.2em;padding:13px 44px;cursor:pointer;
+  font-family:inherit;border-radius:2px;transition:all .3s;}
+#btnStart:hover{background:rgba(40,90,60,.55);color:#eafff2;box-shadow:0 0 26px rgba(80,255,170,.25);}
+#titleHint{color:rgba(160,205,175,.6);font-size:14px;letter-spacing:.25em;}
+
+/* ---- 广告牌 ---- */
+#adCard{position:absolute;left:0;right:0;top:0;bottom:0;display:none;align-items:center;
+  justify-content:center;z-index:25;background:rgba(0,0,0,.96);cursor:pointer;}
+#adCard.show{display:flex;}
+#adPaper{width:700px;max-width:88%;background:
+  radial-gradient(ellipse at 18% 12%,rgba(90,70,40,.14),transparent 42%),
+  radial-gradient(ellipse at 85% 90%,rgba(70,60,30,.18),transparent 40%),
+  radial-gradient(ellipse at 55% 45%,rgba(255,250,230,.25),transparent 60%),#d8cfae;
+  color:#2a2318;padding:44px 52px 30px;transform:rotate(-.6deg);
+  box-shadow:0 18px 70px rgba(0,0,0,.85),inset 0 0 60px rgba(120,95,50,.22);
+  border:1px solid #a89870;outline:4px double #a89870;outline-offset:-14px;}
+#adHead{font-size:24px;font-weight:bold;letter-spacing:.08em;text-align:center;
+  border-bottom:2px solid #4a3d26;padding-bottom:12px;margin-bottom:16px;}
+#adBody{font-size:17px;line-height:1.9;text-align:justify;}
+#adBodyEn{font-size:12.5px;line-height:1.55;margin-top:12px;color:rgba(62,52,32,.72);
+  font-style:italic;text-align:justify;}
+#adWarn{margin-top:16px;padding-top:10px;border-top:1px dashed #8a7a55;
+  color:#1d5c3f;font-style:italic;font-size:15px;}
+#adHint{text-align:center;margin-top:18px;color:#6b5b3e;font-size:13px;letter-spacing:.3em;
+  animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.9}}
+
+/* ---- 尾声字幕卡 ---- */
+#credits{position:absolute;left:0;right:0;top:0;bottom:0;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;background:rgba(0,0,0,.97);z-index:40;
+  color:#a8dcb8;text-align:center;}
+#credits.show{display:flex;}
+#credits .fin{font-size:56px;letter-spacing:.4em;color:#8affc4;text-indent:.4em;}
+#credits .line{font-size:17px;letter-spacing:.12em;color:rgba(190,225,200,.8);}
+#credits .dim{color:rgba(140,170,150,.55);font-size:14px;}
+#btnAgain{margin-top:22px;background:none;color:#bfe9cd;border:1px solid rgba(130,230,175,.45);
+  font-size:17px;letter-spacing:.4em;text-indent:.4em;padding:10px 30px;cursor:pointer;font-family:inherit;}
+#btnAgain:hover{background:rgba(40,90,60,.4);}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>绿血的拯救 · 动画短片</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css?v=26">
+</head>
+<body>
+<div id="stage">
+  <canvas id="cv" width="1280" height="720"></canvas>
+
+  <div id="actLabel"></div>
+
+  <div id="ctrls">
+    <button id="btnChapters" title="章节">章节 ▾</button>
+    <button id="btnAuto" title="自动播放">自动 关</button>
+    <button id="btnVoice" title="选择配音声源">配音:晓晓</button>
+    <button id="btnRate" title="配音语速">语速:中</button>
+    <button id="btnStudio" title="录制我自己的配音">🎙 录我的</button>
+    <button id="btnMute" title="音效">音效 开</button>
+  </div>
+  <div id="voiceMenu"></div>
+  <div id="chapterMenu"></div>
+
+  <div id="titleUI">
+    <div id="titleHint">点击 / 空格 推进剧情 · 建议打开声音</div>
+    <button id="btnStart">开 始</button>
+  </div>
+
+  <div id="adCard">
+    <div id="adPaper">
+      <div id="adHead"></div>
+      <div id="adBody"></div>
+      <div id="adBodyEn"></div>
+      <div id="adWarn"></div>
+      <div id="adHint">—— 点击继续 ——</div>
+    </div>
+  </div>
+
+  <div id="subwrap">
+    <div id="subLine"></div>
+    <div id="subLineEn"></div>
+  </div>
+
+  <div id="studio">
+    <div id="studioBox">
+      <div id="stTitle">🎙 录制我自己的配音 <span id="stProg"></span></div>
+      <div id="stLine"></div>
+      <div id="stLineEn"></div>
+      <div id="stStatus">点“● 录制”后照着上面那句读，说完停顿约 2 秒会自动保存</div>
+      <div id="stBtns">
+        <button id="stPrev">← 上一句</button>
+        <button id="stRec">● 录制</button>
+        <button id="stPlay">▶ 试听</button>
+        <button id="stDel">✕ 删除</button>
+        <button id="stNext">下一句 →</button>
+      </div>
+      <div id="stNav">
+        <button id="stJump">→ 跳到下一句未录</button>
+        <button id="stClose">完成，关闭工作台</button>
+      </div>
+      <div id="stHint">录制时其他音效会自动静音；全部录完后在“配音”菜单里选“🎙 使用我自己的声音”即可生效。录制功能需通过 http://127.0.0.1:8945 打开。</div>
+    </div>
+  </div>
+  <div id="credits"></div>
+</div>
+
+<script src="js/audio.js?v=26"></script>
+<script src="js/voicemine.js?v=26"></script>
+<script src="js/gfx.js?v=26"></script>
+<script src="js/scenes.js?v=26"></script>
+<script src="js/scenes2.js?v=26"></script>
+<script src="js/engine.js?v=26"></script>
+<script src="js/acts/prologue.js?v=26"></script>
+<script src="js/acts/act1.js?v=26"></script>
+<script src="js/acts/act2.js?v=26"></script>
+<script src="js/acts/act3.js?v=26"></script>
+<script src="js/acts/act4.js?v=26"></script>
+<script src="js/acts/act5.js?v=26"></script>
+<script src="js/acts/act6.js?v=26"></script>
+<script src="js/main.js?v=26"></script>
+</body>
+</html>
