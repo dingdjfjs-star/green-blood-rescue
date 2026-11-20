@@ -239,6 +239,7 @@ Engine.register({
       },
       enter(){
         AudioSys.setMood('quiet'); AudioSys.setHeartbeat(0); AudioSys.setDrip(false); AudioSys.setAmb(0.15);
+        if(Engine._exporting) setTimeout(()=>Engine.stopExport(),4000);   // 导出录制在致谢卡停留 4 秒后自动收尾
         const cr=Engine.$.credits;
         cr.innerHTML=
           '<div class="fin">— Fin —</div>'+

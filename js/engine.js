@@ -154,6 +154,15 @@ const Engine = {
       AudioSys.rateIdx=(AudioSys.rateIdx+1)%AudioSys.rates.length;
       br.textContent='语速:'+AudioSys.rates[AudioSys.rateIdx].label;
     });
+    /* 视频导出：从头自动播放全片并录制为 WebM */
+    const be=document.getElementById('btnExport');
+    be.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(this._exporting){ this.stopExport(); return; }
+      if(confirm('将从头自动播放全片并录制为 WebM 视频文件（约 8-10 分钟）。\n录制期间请勿点击画面、勿切换窗口。现在开始？')){
+        this.startExport();
+      }
+    });
     /* 录音工作台 */
     const bs=document.getElementById('btnStudio');
     bs.addEventListener('click',e=>{ e.stopPropagation(); AudioSys.ensure(); this.openStudio(); });
@@ -216,6 +225,7 @@ const Engine = {
 
   /* ---------- 推进 ---------- */
   advance(){
+    if(this._exporting) return;   // 导出录制期间屏蔽手动推进
     AudioSys.ensure();
     if(this.state==='ad'){ this.closeAd(); return; }
     if(this.state!=='play') return;
@@ -385,6 +395,50 @@ const Engine = {
     }
   },
 
+  /* ---------- 视频导出（页面内 MediaRecorder 合流录制） ---------- */
+  startExport(){
+    if(this._exporting) return;
+    const dest=AudioSys.ensureRecordDest();
+    if(!dest||!this.cv.captureStream){ alert('此环境不支持视频录制'); return; }
+    this._exporting=true;
+    this._expSec=0;
+    const stream=this.cv.captureStream(30);
+    dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
+    let mime='video/webm;codecs=vp9,opus';
+    if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm';
+    this._chunks=[];
+    this._rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000});
+    this._rec.ondataavailable=e=>{ if(e.data&&e.data.size) this._chunks.push(e.data); };
+    this._rec.onstop=()=>{
+      const blob=new Blob(this._chunks,{type:'video/webm'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='绿血的拯救.webm';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      this._exporting=false;
+      this.$.label.textContent=this.acts[this.ai].title;
+    };
+    this._rec.start(1000);
+    // 回到序幕从头播，自动开
+    this.autoplay=true;
+    document.getElementById('btnAuto').textContent='自动 开';
+    this.$.ad.classList.remove('show');
+    this.$.credits.classList.remove('show');
+    this.$.titleUI.classList.remove('show');
+    this.fadeOut(()=>{ this.loadAct(0); });
+    this.$.label.textContent='⏺ 导出中 0:00';
+  },
+  stopExport(){
+    if(this._rec&&this._rec.state!=='inactive'){ try{ this._rec.stop(); }catch(e){} }
+  },
+  tickExport(dt){
+    if(!this._exporting) return;
+    this._expSec+=dt;
+    const m=Math.floor(this._expSec/60), s=Math.floor(this._expSec%60);
+    this.$.label.textContent='⏺ 导出中 '+m+':'+String(s).padStart(2,'0');
+  },
+
   /* ---------- 主循环 ---------- */
   loop(ts){
     const dt=Math.min(0.05,(ts-this.lastTs)/1000||0.016);
@@ -458,6 +512,7 @@ const Engine = {
     }
     this.shake*=Math.pow(0.002,dt);
     if(this.shake<0.05) this.shake=0;
+    this.tickExport(dt);
   },
   render(){
     const ctx=this.ctx;

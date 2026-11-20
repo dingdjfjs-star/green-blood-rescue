@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>交互教学 · 绿血的拯救动画</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{ --ink:#a8dcb8; --paper:#0a120e; --line:rgba(120,200,160,.25); --hl:#8affc4; }
+  *{box-sizing:border-box}
+  body{margin:0;background:#040806;color:#cfe8d6;
+    font-family:Georgia,"Times New Roman","Songti SC","SimSun",serif;line-height:1.85;}
+  header{padding:40px 8vw 24px;border-bottom:1px solid var(--line);}
+  header h1{margin:0;font-size:30px;letter-spacing:.2em;color:var(--hl);font-weight:normal;}
+  header p{color:rgba(150,190,165,.7);margin:10px 0 0;}
+  nav{position:sticky;top:0;background:rgba(4,8,6,.94);padding:10px 8vw;display:flex;gap:18px;
+    flex-wrap:wrap;border-bottom:1px solid var(--line);z-index:5;}
+  nav a{color:rgba(180,225,195,.8);text-decoration:none;font-size:14px;letter-spacing:.08em;}
+  nav a:hover{color:var(--hl);}
+  nav a.done::after{content:" ✓";color:#8affc4;}
+  main{padding:34px 8vw 80px;max-width:1000px;}
+  section{margin-bottom:70px;}
+  h2{font-size:22px;color:#bfe9cd;font-weight:normal;letter-spacing:.1em;
+    border-left:3px solid rgba(120,230,160,.5);padding-left:14px;}
+  h3{font-size:17px;color:#a8dcb8;font-weight:normal;}
+  p,li{color:rgba(205,230,214,.85);font-size:15.5px;}
+  code,pre{font-family:Consolas,Menlo,monospace;}
+  code{background:rgba(90,200,140,.12);padding:1px 7px;border-radius:3px;color:#a5f0c5;font-size:13.5px;}
+  pre{background:#060d0a;border:1px solid var(--line);padding:16px 20px;overflow-x:auto;
+    font-size:13px;line-height:1.7;color:#b9e8cd;position:relative;}
+  pre .copy{position:absolute;right:10px;top:8px;background:rgba(40,90,60,.5);color:#cfe8d6;
+    border:1px solid var(--line);padding:2px 10px;cursor:pointer;font-size:12px;border-radius:3px;}
+  .demo{background:#060d0a;border:1px solid var(--line);padding:20px;margin:18px 0;
+    box-shadow:inset 0 0 40px rgba(30,90,60,.08);}
+  .demo canvas{display:block;background:#020504;margin:0 auto;max-width:100%;}
+  .ctl{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:14px;justify-content:center;}
+  .ctl label{color:rgba(160,205,175,.8);font-size:14px;}
+  .ctl input[type=range]{width:200px;accent-color:#4ade80;}
+  .ctl button,.btnrow button{background:rgba(12,24,18,.7);color:#cfe8d6;
+    border:1px solid rgba(130,230,175,.35);padding:8px 20px;cursor:pointer;
+    font-family:inherit;font-size:14px;letter-spacing:.1em;border-radius:3px;}
+  .ctl button:hover,.btnrow button:hover{background:rgba(40,90,60,.55);color:#eafff2;}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .tip{font-size:13px;color:rgba(140,175,150,.65);text-align:center;margin-top:10px;}
+  .mark{text-align:right;margin-top:8px;}
+  .mark button{background:none;border:1px dashed var(--line);color:rgba(160,205,175,.7);
+    padding:4px 14px;cursor:pointer;font-family:inherit;font-size:13px;}
+  .mark button.done{color:#8affc4;border-style:solid;}
+  table{border-collapse:collapse;width:100%;font-size:14px;}
+  td,th{border:1px solid var(--line);padding:8px 14px;text-align:left;color:rgba(205,230,214,.85);}
+  th{color:#bfe9cd;font-weight:normal;background:rgba(40,90,60,.25);}
+  a{color:#8affc4;}
+</style>
+</head>
+<body>
+<header>
+  <h1>绿血的拯救 · 交互教学</h1>
+  <p>从零复刻一部"零素材全代码绘制"的网页动画短片。每个核心机制都做成可玩的组件——直接操作本项目的真实代码模块。</p>
+</header>
+<nav id="nav">
+  <a href="#s1">① 剪影人形</a>
+  <a href="#s2">② 影子慢半拍</a>
+  <a href="#s3">③ 情绪音乐</a>
+  <a href="#s4">④ 镜头关键帧</a>
+  <a href="#s5">⑤ 粉笔书写</a>
+  <a href="#s6">⑥ 架构与踩坑</a>
+</nav>
+<main>
+
+<section id="s1">
+  <h2>① 剪影人形：2-3 个几何体就成立</h2>
+  <p>不画五官，靠<strong>轮廓+侧光</strong>叙事。人形 = 躯干粗描线（大衣）+ 四肢圆帽线 + 头椭圆，姿势是<strong>关节目标表</strong>：每个姿势只是一组髋/脚/手的坐标。发型（乱发/平顶/长发/鸭舌帽）、围巾、立领、烟斗都是叠加的剪影形状。</p>
+  <p>按钮切换姿势，注意<strong>姿势过渡</strong>：两套关节目标按 0.35 秒插值，人物有了"重量感"而不是跳帧。</p>
+  <div class="demo">
+    <canvas id="cv1" width="900" height="420"></canvas>
+    <div class="ctl">
+      <button data-pose="stand">站立</button>
+      <button data-pose="walk">行走</button>
+      <button data-pose="point">指向</button>
+      <button data-pose="sit">坐下</button>
+      <button data-pose="kneel">跪</button>
+      <button data-pose="work">俯身</button>
+      <label>呼吸 <input type="range" id="breath" min="0" max="2" step="0.01" value="1"></label>
+    </div>
+    <div class="tip">绿色描边是 0.35 秒姿势过渡——两套关节目标在插值（poseFrom/poseK）</div>
+  </div>
+  <div class="mark"><button data-m="s1">✓ 学完标记</button></div>
+</section>
+
+<section id="s2">
+  <h2>② 影子慢半拍：Rig 历史缓冲</h2>
+  <p>每帧把角色姿态 <code>{t,x,y,pose,ph}</code> 压入环形历史；影子画 <code>t−lag</code> 时刻的快照。<strong>拖动滑块改变 lag</strong>——0 秒影子就是正常跟随，1.5 秒影子像"被深度标记的亡者"。全片五种 lag 变奏（老鼠 1s / 主角 0.5s / 影子生物 0s）全部来自这一个机制。</p>
+  <div class="demo">
+    <canvas id="cv2" width="900" height="360"></canvas>
+    <div class="ctl">
+      <label>影子滞后 lag <input type="range" id="lag" min="0" max="1.5" step="0.05" value="0.5"></label>
+      <span id="lagVal" style="color:#8affc4;font-size:14px">0.50s</span>
+    </div>
+    <div class="tip">绿色=本体，暗色=影子副本。小人来回走，影子在 t−lag 时刻追随</div>
+  </div>
+  <div class="mark"><button data-m="s2">✓ 学完标记</button></div>
+</section>
+
+<section id="s3">
+  <h2>③ 分层情绪音乐：底噪参数即情绪</h2>
+  <p>底噪 = 两层失谐锯齿 + 一层次声部过低通。<strong>情绪就是这组参数的预设</strong>：恐惧把锯齿调成 49/51.5Hz（小二度拍频，生理性发毛），高潮抬滤波加快搏动。切幕时全部参数 2.5 秒渐变。点按钮试听（需浏览器允许声音）。</p>
+  <div class="demo">
+    <div class="btnrow">
+      <button data-mood="calm">平静（一幕）</button>
+      <button data-mood="mystery">诡秘（序幕）</button>
+      <button data-mood="dread">恐惧（三五幕）</button>
+      <button data-mood="tension">紧张（四幕）</button>
+      <button data-mood="climax">高潮（六幕）</button>
+      <button data-mood="quiet">静默（尾声）</button>
+    </div>
+    <div class="tip" id="moodTip">当前：未播放 —— 当前情绪参数：三振荡器频率/增益、低通截止、AM 搏动、呼吸 LFO</div>
+  </div>
+  <div class="mark"><button data-m="s3">✓ 学完标记</button></div>
+</section>
+
+<section id="s4">
+  <h2>④ 镜头关键帧：lookAt + 缩放</h2>
+  <p>镜头 = <strong>注视点 (lx,ly) + 缩放 z</strong>。渲染时把注视点搬到屏幕中心再放大，场景和雾都在"镜头空间"里。拖滑块移动注视点——注意 <strong>lookAt 必须约束在场景内</strong>，越界露出黑边（我们把关键帧全部约束在有效窗口内）。</p>
+  <div class="demo">
+    <canvas id="cv4" width="900" height="420"></canvas>
+    <div class="ctl">
+      <label>lookX <input type="range" id="lx" min="300" max="980" step="1" value="640"></label>
+      <label>缩放 <input type="range" id="zm" min="1" max="1.6" step="0.02" value="1.15"></label>
+    </div>
+    <div class="tip">预览：地下室场景 + 剪影角色（本页直接加载项目真实 gfx/scenes 模块绘制）</div>
+  </div>
+  <div class="mark"><button data-m="s4">✓ 学完标记</button></div>
+</section>
+
+<section id="s5">
+  <h2>⑤ 粉笔书写：笔画折线 + 长度截断</h2>
+  <p>"Rache" 上墙不是字体渲染，而是<strong>手绘折线数据</strong>：每个字母 1-3 笔，每笔是一组归一化坐标点；书写进度按<strong>累计笔画长度</strong>截断，双描+抖动模拟粉笔质感。第 4-3 幕每写一个字母配一声刮擦。</p>
+  <div class="demo">
+    <canvas id="cv5" width="900" height="300"></canvas>
+    <div class="ctl"><button id="chalkGo">✍ 重新书写</button></div>
+    <div class="tip">折线数据在 act4.js 顶部 RACHE_STROKES——改坐标就改字形</div>
+  </div>
+  <div class="mark"><button data-m="s5">✓ 学完标记</button></div>
+</section>
+
+<section id="s6">
+  <h2>⑥ 架构、踩坑与扩展</h2>
+  <h3>架构一句话</h3>
+  <p>引擎只认识"节拍"；剧本层（acts/*.js）提供字幕、画面绘制函数和可选参数（雾密度/心跳/运镜）。<strong>叙事结构与代码结构一一对应</strong>——加一幕零改引擎。</p>
+  <h3>精选踩坑（全 12 条见项目 AGENTS.md）</h3>
+  <table>
+    <tr><th>#</th><th>坑</th><th>解法</th></tr>
+    <tr><td>1</td><td>高 DPI 画面被裁 20%</td><td>backing store 必须随 setTransform 的 ss 同步放大</td></tr>
+    <tr><td>2</td><td>节拍切换永久黑屏</td><td>淡出回调里 loadBeat 后忘接 fadeIn</td></tr>
+    <tr><td>3</td><td>影子画出画布外</td><td>外层变换包裹自带变换的绘制函数 = 双重镜像</td></tr>
+    <tr><td>4</td><td>draw 抛错全屏黑</td><td>rAF 链因异常断裂；先在测试画布手动执行 draw 排错</td></tr>
+    <tr><td>5</td><td>后台切走动画冻结</td><td>别信 visibilityState，用 rAF 心跳看门狗挂兜底时钟</td></tr>
+    <tr><td>6</td><td>浏览器缓存抱旧 js</td><td>server 发 no-store + 资源引用带 ?v=N 参数</td></tr>
+  </table>
+  <h3>扩展练习</h3>
+  <ul>
+    <li>加一幕：复制 act3.js 改 subs/draw，index.html 加一行 script——引擎零改动</li>
+    <li>改影子性格：Rig.set 的 lag 传负数，影子先于人移动</li>
+    <li>加情绪：MOODS 加预设 waltz，某幕 mood:'waltz'，听 2.5 秒渐变</li>
+    <li>改字形：RACHE_STROKES 坐标改一笔，看粉笔字变形</li>
+  </ul>
+  <p>完整文档：<a href="../TUTORIAL.md">TUTORIAL.md</a> · <a href="../AGENTS.md">AGENTS.md（架构与踩坑全录）</a> · <a href="../index.html">回到动画</a></p>
+</section>
+
+</main>
+<script src="../js/gfx.js?v=28"></script>
+<script src="../js/scenes.js?v=28"></script>
+<script src="../js/audio.js?v=28"></script>
+<script>
+/* ============ 教学演示 ============ */
+(function(){
+  const $=id=>document.getElementById(id);
+  // 进度打卡
+  document.querySelectorAll('.mark button').forEach(b=>{
+    const key='greenblood_tutorial_'+b.dataset.m;
+    if(localStorage.getItem(key)) b.classList.add('done'), b.textContent='✓ 已学';
+    b.addEventListener('click',()=>{ localStorage.setItem(key,'1');
+      b.classList.add('done'); b.textContent='✓ 已学'; });
+  });
+  navWatch();
+
+  /* ---- ① 剪影人形 + 姿势过渡 ---- */
+  const cv1=$('cv1'), x1=cv1.getContext('2d');
+  let pose='stand', poseFrom=null, poseK=1;
+  document.querySelectorAll('#s1 .ctl button[data-pose]').forEach(b=>{
+    b.addEventListener('click',()=>{ poseFrom=pose; poseK=0; pose=b.dataset.pose; });
+  });
+  const t0=performance.now();
+  (function loop1(){
+    const t=(performance.now()-t0)/1000;
+    x1.clearRect(0,0,900,420);
+    x1.fillStyle='#020504'; x1.fillRect(0,0,900,420);
+    glow(x1,450,150,260,'rgba(60,200,130,$A)',0.10);
+    humanoid(x1,{x:450,y:370,h:300,pose:pose,poseFrom:poseFrom,poseK:ease(poseK),
+      ph:t*7,t:t,flip:false,coatW:1.18,pipe:true,hair:'messy',scarf:true,groundShadow:true,rim:true});
+    poseK=Math.min(1,poseK+0.025);
+    // 站姿呼吸展示
+    x1.fillStyle='rgba(160,205,175,.6)'; x1.font='13px Georgia,serif'; x1.textAlign='center';
+    x1.fillText('呼吸与重心微移由 o.t 驱动（humanoid 内部）',450,400);
+    requestAnimationFrame(loop1);
+  })();
+
+  /* ---- ② 影子慢半拍 ---- */
+  const cv2=$('cv2'), x2=cv2.getContext('2d');
+  let lag=0.5;
+  $('lag').addEventListener('input',e=>{ lag=+e.target.value; $('lagVal').textContent=lag.toFixed(2)+'s'; });
+  const R2={hist:[]}; const t2s=performance.now();
+  (function loop2(){
+    const t=(performance.now()-t2s)/1000;
+    const x=450+Math.sin(t*1.1)*260;
+    R2.hist.push({t,x,y:290,pose:Math.cos(t*1.1)>=0?'walk':'walk',ph:t*8,flip:Math.cos(t*1.1)<0,s:1});
+    while(R2.hist.length>2&&R2.hist[1].t<t-3) R2.hist.shift();
+    x2.clearRect(0,0,900,360);
+    x2.fillStyle='#020504'; x2.fillRect(0,0,900,360);
+    x2.strokeStyle='rgba(90,180,130,.25)'; x2.beginPath(); x2.moveTo(40,300); x2.lineTo(860,300); x2.stroke();
+    // 影子（t-lag）
+    const tt=t-lag;
+    let ps=R2.hist[0];
+    for(let i=R2.hist.length-1;i>=0;i--){ if(R2.hist[i].t<=tt){ ps=R2.hist[i]; break; } }
+    x2.save(); x2.translate(ps.x+18,ps.y+4);
+    humanoid(x2,{x:0,y:0,h:230,pose:'walk',ph:ps.ph,flip:ps.flip,color:'rgba(2,6,4,0.9)'});
+    x2.restore();
+    // 本体
+    humanoid(x2,{x:x,y:290,h:230,pose:'walk',ph:t*8,flip:Math.cos(t*1.1)<0,color:'#0a1410',hair:'messy',scarf:true,groundShadow:true,rim:true});
+    x2.fillStyle='rgba(160,205,175,.6)'; x2.font='13px Georgia,serif'; x2.textAlign='center';
+    x2.fillText('影子画的是 t−lag 时刻的 Rig 快照',450,340);
+    requestAnimationFrame(loop2);
+  })();
+
+  /* ---- ③ 情绪音乐 ---- */
+  document.querySelectorAll('#s3 button[data-mood]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      AudioSys.ensure(); AudioSys.setMood(b.dataset.mood);
+      const m=AudioSys.MOODS[b.dataset.mood];
+      $('moodTip').textContent='当前：'+b.textContent+' —— 振荡器 '+m.osc.map(o=>o[0]+'Hz').join('/')+
+        ' · 低通 '+m.cutoff+'Hz · 搏动 '+m.pulseHz+'Hz×'+m.pulse;
+    });
+  });
+
+  /* ---- ④ 镜头关键帧 ---- */
+  const cv4=$('cv4'), x4=cv4.getContext('2d');
+  const S4=Scenes.basement();
+  const a4={x:500,y:614,pose:'stand',ph:0,flip:true,s:1};
+  const ly0=430, FIT=900/1280;   // 视窗 900 宽对应场景 1280 宽
+  (function loop4(){
+    const t=performance.now()/1000;
+    const lx=+$('lx').value, z=+$('zm').value;
+    x4.clearRect(0,0,900,420);
+    x4.save();
+    // 镜头变换：注视点搬屏幕中心 → 缩放 → 回到适配坐标系
+    x4.translate(450,210);
+    x4.scale(z*FIT, z*FIT);
+    x4.translate(-lx,-ly0);
+    S4.draw(x4,t);
+    Rig.set('h4',t,500,614,'stand',0,true,1,0.5);
+    drawShadowOf(x4,Chars.holmes,Rig.at('h4',t)||a4,{lampX:640});
+    Chars.holmes(x4,{x:500,y:614,pose:'stand',ph:0,flip:true,s:1},{rim:true,t:t});
+    Chars.watson(x4,{x:700,y:614,pose:'sit',ph:0,flip:true,s:0.92},{rim:true});
+    Props.chair(x4,790,614,0.9);
+    x4.restore();
+    requestAnimationFrame(loop4);
+  })();
+})();
+</script>
+</body>
+</html>

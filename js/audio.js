@@ -266,6 +266,23 @@ const AudioSys = {
     if(this.engine!=='neural'||!text) return;
     try{ fetch(this.ttsUrl(text,this.neuralId),{mode:'cors'}).catch(()=>{}); }catch(e){}
   },
+  /* ---- 视频导出：把配音与音效混入一条 MediaStream（供 MediaRecorder 合流） ---- */
+  _recDest:null, _voiceSrc:null,
+  ensureRecordDest(){
+    this.ensure();
+    if(!this.ctx) return null;
+    if(this._recDest) return this._recDest;
+    if(!this._audioEl) this._audioEl=new Audio();   // 占位，后续 speak 复用
+    this._recDest=this.ctx.createMediaStreamDestination();
+    this.master.connect(this._recDest);             // 音效进流
+    try{
+      this._voiceSrc=this.ctx.createMediaElementSource(this._audioEl);
+      this._voiceSrc.connect(this._recDest);        // 配音进流
+      this._voiceSrc.connect(this.master);          // 配音照常出声
+    }catch(e){}
+    return this._recDest;
+  },
+
   speak(text,onEnd,key){
     this.stopSpeak();
     const noOut=()=>{ this._voiceDone=true; onEnd&&onEnd(); return false; };
