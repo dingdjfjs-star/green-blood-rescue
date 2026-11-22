@@ -459,7 +459,7 @@ const Engine = {
         const now=AudioSys.ctx.currentTime;
         while(ks.i<ks.count && now>=ks.t0+ks.i*ks.gap){
           ks.i++;
-          if(ks.onEach) ks.onEach();
+          if(ks.onEach) ks.onEach(ks.i);   // 传入第几下：震感可逐次递增
         }
         if(ks.i>=ks.count){ this._knockSched=null; if(ks.onDone) ks.onDone(); }
       }

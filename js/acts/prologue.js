@@ -82,7 +82,7 @@ Engine.register({
           const t0=AudioSys.ctx.currentTime+0.2;
           AudioSys.knock4(t0);   // 声音走音频时钟调度（后台照响）
           Engine._knockSched={t0:t0,count:4,gap:0.85,i:0,
-            onEach:()=>Engine.doShake(7), onDone:()=>Engine.advance()};
+            onEach:(i)=>Engine.doShake(3+i*1.3), onDone:()=>Engine.advance()};
           btn.removeEventListener('click',go);
         };
         btn.addEventListener('click',go);
