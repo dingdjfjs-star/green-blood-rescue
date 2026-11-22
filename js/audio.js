@@ -101,7 +101,7 @@ const AudioSys = {
     o.connect(g); g.connect(this.master); o.start(t); o.stop(t+0.2);
   },
 
-  /* ---- 敲门：一声，四下由 knock4 调度 ---- */
+  /* ---- 敲门：声音用 WebAudio 音频时钟精确调度（后台照响）；视觉震动由引擎按音频时钟触发 ---- */
   knockOne(when, hard){
     const c=this.ctx; const t=when||c.currentTime;
     const o=c.createOscillator(); o.type='sine';
@@ -115,16 +115,11 @@ const AudioSys = {
     ng.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
     n.connect(nf); nf.connect(ng); ng.connect(this.master); n.start(t); n.stop(t+0.12);
   },
-  /* 四下，不多不少：一声一停 */
-  knock4(onEach,onDone){
-    if(!this.ctx){ if(onDone)setTimeout(onDone,3400); return; }
-    const t0=this.ctx.currentTime+0.15;
-    for(let i=0;i<4;i++){
-      const t=t0+i*0.85;
-      this.knockOne(t,true);
-      setTimeout(()=>{ onEach&&onEach(); }, (t-this.ctx.currentTime)*1000);
-    }
-    if(onDone) setTimeout(onDone, (t0-this.ctx.currentTime+4*0.85+0.35)*1000);
+  knock4(t0, count, gap, hard){
+    count=count||4; gap=gap||0.85;
+    if(!this.ctx) return t0;
+    for(let i=0;i<count;i++) this.knockOne(t0+i*gap, hard!==false);
+    return t0+count*gap;   // 结束时刻（音频时钟）
   },
 
   /* ---- 滴水 ---- */

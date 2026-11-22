@@ -35,33 +35,31 @@ const Engine = {
     };
     this.fit(); window.addEventListener('resize',()=>this.fit());
     this.bindInput();
-    this._tickFallback=null; this._rafAlive=performance.now();
-    document.addEventListener('visibilitychange',()=>this._watchdog());
-    VoiceMine.loadAll();   // 预载用户录音（IndexedDB），"我的声音"引擎播放时立即可用
+    this._rafAlive=performance.now();
+    this._knockSched=null;
+    this._initWakeWorker();   // Worker 心跳：后台时替 rAF 推帧（不受后台节流）
+    VoiceMine.loadAll();      // 预载用户录音（IndexedDB），"我的声音"引擎播放时立即可用
     this.loadAct(0);
     requestAnimationFrame(ts=>this.loop(ts));
-    /* 自愈看门狗：IAB 后台时 document.hidden 可能为 false 但 rAF 停摆——
-       监测 rAF 心跳，停了就挂兜底时钟，恢复就拆掉 */
-    this._watch=setInterval(()=>{
-      if(this._tickFallback) return;
-      if(performance.now()-this._rafAlive>1300) this._onVis();
-    },1000);
   },
 
-  /* rAF 心跳停摆时的兜底：低频时钟继续推进（音频与字幕同步），恢复后自动拆除。
-     后台 tick 被浏览器节流到约 1s，dt 放宽到 0.5s 保证剧情时间与真实时间同步（广播剧模式） */
-  _onVis(){
-    if(this._tickFallback) return;
-    this._lastWall=performance.now();
-    this._tickFallback=setInterval(()=>{
-      if(performance.now()-this._rafAlive<1200){  // rAF 恢复了
-        clearInterval(this._tickFallback); this._tickFallback=null; return;
-      }
-      const now=performance.now();
-      const dt=Math.min(0.5,(now-this._lastWall)/1000);
-      this._lastWall=now; this.lastTs=now;
-      this.update(dt); this.render();
-    },100);
+  /* ---- 后台心跳（Web Worker）：rAF 停摆时以 ~4fps 补帧推进（广播剧模式） ----
+     Worker 定时器不受页面后台节流；worker 每条消息到达时若 rAF 心跳过期则补一帧 */
+  _initWakeWorker(){
+    try{
+      const src = 'setInterval(()=>postMessage(1),250);';
+      const w = new Worker(URL.createObjectURL(new Blob([src],{type:'application/javascript'})));
+      w.onmessage = () => {
+        if(performance.now() - this._rafAlive > 400) this._pumpOnce();
+      };
+      this._wakeWorker = w;
+    }catch(e){ /* worker 不可用时退化为主线程节流行为 */ }
+  },
+  _pumpOnce(){
+    const now = performance.now();
+    const dt = Math.min(0.5,(now-(this._lastWall||now))/1000);
+    this._lastWall = now; this.lastTs = now; this._rafAlive = now;
+    this.update(dt); this.render();
   },
 
   fit(){
@@ -449,6 +447,16 @@ const Engine = {
   update(dt){
     if(this.state==='play'){
       this.beatT+=dt;
+      // 敲门视觉/推进：按音频时钟触发（声音已精确调度，后台也同步）
+      const ks=this._knockSched;
+      if(ks&&AudioSys.ctx){
+        const now=AudioSys.ctx.currentTime;
+        while(ks.i<ks.count && now>=ks.t0+ks.i*ks.gap){
+          ks.i++;
+          if(ks.onEach) ks.onEach();
+        }
+        if(ks.i>=ks.count){ this._knockSched=null; if(ks.onDone) ks.onDone(); }
+      }
       // 镜头关键帧插值（lookAt + zoom，smoothstep 缓动）
       if(this._camKeys&&this._camKeys.length){
         const K=this._camKeys;

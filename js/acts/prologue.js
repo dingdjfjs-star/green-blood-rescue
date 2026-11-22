@@ -79,7 +79,10 @@ Engine.register({
           btn.disabled=true; btn.style.opacity=0.4;
           Engine.$.titleUI.classList.remove('show');
           AudioSys.ensure();
-          AudioSys.knock4(()=>Engine.doShake(3.4),()=>Engine.advance());
+          const t0=AudioSys.ctx.currentTime+0.2;
+          AudioSys.knock4(t0);   // 声音走音频时钟调度（后台照响）
+          Engine._knockSched={t0:t0,count:4,gap:0.85,i:0,
+            onEach:()=>Engine.doShake(3.4), onDone:()=>Engine.advance()};
           btn.removeEventListener('click',go);
         };
         btn.addEventListener('click',go);

@@ -113,7 +113,9 @@ Engine.register({
         // 敲门触发
         if(this._lastSub===undefined) this._lastSub=-1;
         if(si===1&&this._lastSub===0){
-          AudioSys.knock4(()=>Engine.doShake(2.6));
+          const bt0=AudioSys.ctx.currentTime+0.05;
+          AudioSys.knock4(bt0,true);
+          Engine._knockSched={t0:bt0,count:4,gap:0.85,i:0,onEach:()=>Engine.doShake(2.6)};
           this._knockT=t;
         }
         this._lastSub=si;
@@ -156,7 +158,9 @@ Engine.register({
         const si=Engine.subI;
         if(this._lastSub===undefined) this._lastSub=-1;
         if(si===1&&this._lastSub===0){
-          AudioSys.knock4(()=>Engine.doShake(3.6));
+          const bt0=AudioSys.ctx.currentTime+0.05;
+          AudioSys.knock4(bt0,true);
+          Engine._knockSched={t0:bt0,count:4,gap:0.85,i:0,onEach:()=>Engine.doShake(3.6)};
           this._knockT=t;
         }
         if(si===1&&this._knockT!==undefined&&t<this._knockT+3.6){
