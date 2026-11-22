@@ -196,11 +196,30 @@ Engine.register({
         ctx.fillRect(0,0,1280,720);
         lyingFigure(ctx,{x:1090,y:560,h:230,headRight:false,color:'#080c0a',
           headColor:'rgba(190,195,182,0.75)',blanket:'#101813'});
-        const hs={x:960,y:618,pose:'sit',ph:0,flip:true,s:0.98,
-          lean:si===1?0.04*Math.sin(t*8):0.015*Math.sin(t*1.2)};
+        // 三天递进的亲密：写字守望 → 握手拇指摩挲 → 俯身贴近说给昏迷的他听
+        const hsX=[960,975,1000,1000][si]||975;
+        const hs={x:hsX,y:618,pose:'sit',ph:0,flip:true,s:0.98,
+          lean:(si>=2?0.055:0.015)+((si===1)?0.02*Math.sin(t*8):0)};
         Rig.set('holmes',t,hs.x,hs.y,'sit',0,true,0.98,0.4);
         drawShadowOf(ctx,Chars.holmes,Rig.at('holmes',t)||hs,{});
         Chars.holmes(ctx,hs,{rim:true,t:t});
+        // 相握的手：拇指缓慢摩挲（第二天起一直没松开）
+        if(si>=1){
+          const gx=1035, gy=552+Math.sin(t*1.2)*2;
+          glow(ctx,gx,gy,26,'rgba(255,224,185,$A)',0.12+0.03*Math.sin(t*2));
+          ctx.fillStyle='rgba(8,12,10,0.95)';
+          ctx.beginPath(); ctx.ellipse(gx-6,gy,11,7,-0.25,0,TAU); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(gx+5,gy+2,10,6,0.15,0,TAU); ctx.fill();
+          ctx.strokeStyle='rgba(8,12,10,0.95)'; ctx.lineWidth=3.5;
+          ctx.beginPath();
+          const th=t*1.1;
+          ctx.arc(gx,gy-1,5,th,th+1.6); ctx.stroke();
+        }
+        // 第三天起：俯身贴近——额头几乎碰到他的额头，说给昏迷的他听
+        if(si>=2){
+          const k2=ease(clamp((t-1)/2,0,1));
+          glow(ctx,1042,430,60,'rgba(140,255,190,$A)',0.10*k2);
+        }
         if(si===0){
           ctx.save();
           ctx.translate(760,470); ctx.rotate(-0.06);
@@ -246,17 +265,46 @@ Engine.register({
         const S=Scenes.basement(); S.draw(ctx,t);
         const P=S.pts;
         const si=Engine.subI;
-        const ws={x:1075,y:566,pose:'sit',ph:0,flip:false,s:0.9,lean:0.02*Math.sin(t*1.6)};
+        const ws={x:1075,y:566,pose:'sit',ph:0,flip:false,s:0.9,
+          lean:(si>=3?0.03:0.02)+0.012*Math.sin(t*1.4)};
         Rig.set('watson',t,ws.x,ws.y,'sit',0,false,0.9,0.4);
         drawShadowOf(ctx,Chars.watson,Rig.at('watson',t)||ws,{});
         Chars.watson(ctx,ws,{rim:true});
-        const hs={x:950,y:620,pose:'sit',ph:0,flip:true,s:1,
-          lean:si>=4?0:0.035};
+        // 福尔摩斯坐得极近，俯身低头——额头抵着华生搭过来的手背
+        const hs={x:980,y:622,pose:'sit',ph:0,flip:true,s:1,lean:0.075};
         Rig.set('holmes',t,hs.x,hs.y,'sit',0,true,1,0.4);
         drawShadowOf(ctx,Chars.holmes,Rig.at('holmes',t)||hs,{});
         Chars.holmes(ctx,hs,{rim:true,t:t});
-        if(si>=4){
-          glow(ctx,1010,470,90,'rgba(140,255,190,$A)',0.10+0.04*Math.sin(t*1.8));
+        // 华生的手搭在福尔摩斯的发上，指尖缓慢穿行（si>=1 起）
+        if(si>=1){
+          const hx0=988+Math.sin(t*0.9)*4, hy0=372;
+          ctx.strokeStyle='rgba(8,12,10,0.95)'; ctx.lineWidth=7; ctx.lineCap='round';
+          ctx.beginPath(); ctx.moveTo(1062,438);
+          ctx.quadraticCurveTo(1030,400, hx0+8,hy0); ctx.stroke();
+          const fk=t*1.3;
+          for(let f=0;f<3;f++){
+            const px=hx0+6+Math.sin(fk+f*2.1)*7-f*3, py=hy0-2+f*4;
+            ctx.fillStyle='rgba(8,12,10,0.95)';
+            ctx.beginPath(); ctx.arc(px,py,4.5,0,TAU); ctx.fill();
+          }
+          ctx.fillStyle='rgba(10,16,12,0.9)';
+          ctx.beginPath(); ctx.ellipse(hx0+8,hy0+2,10,6,0.1,0,TAU); ctx.fill();
+        }
+        // 握着的那只手一直没松开（暖光微晕）
+        const gy=470+Math.sin(t*1.2)*2;
+        glow(ctx,1022,gy,24,'rgba(255,224,185,$A)',0.12+0.03*Math.sin(t*2));
+        ctx.fillStyle='rgba(8,12,10,0.95)';
+        ctx.beginPath(); ctx.ellipse(1018,gy,11,7,-0.2,0,TAU); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(1030,gy+2,10,6,0.15,0,TAU); ctx.fill();
+        // si>=2：额头几乎相抵的静默
+        if(si>=2){
+          glow(ctx,1030,420,70,'rgba(140,255,190,$A)',0.10+0.03*Math.sin(t*1.6));
+        }
+        // si>=3（最后一句）：“灯从绿色变成另一种绿色”——灯光色相缓慢迁移，华生闭眼
+        if(si>=3){
+          const k3=ease(clamp((t-0.5)/6,0,1));
+          const cr=Math.floor(150-30*k3), cg=Math.floor(255-20*k3), cb=Math.floor(190+65*k3);
+          glow(ctx,P4.lampX,P4.lampY,300,`rgba(${cr},${cg},${cb},$A)`,0.16+0.05*k3);
         }
       }
     }
