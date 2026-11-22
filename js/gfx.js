@@ -165,9 +165,22 @@ function humanoid(ctx,o){
   ctx.beginPath(); ctx.ellipse(hcx,headCY,headR*0.92,headR*1.08,0,0,TAU); ctx.fill();
   // 头顶英伦风：高顶礼帽/圆顶礼帽（维多利亚绅士标配），或及肩长发
   const hat=o.hat, hair=o.hair;
-  if(hat==='top'){ // 高顶礼帽（福尔摩斯）：帽檐+圆筒
-    ctx.beginPath(); ctx.ellipse(hcx,headCY-headR*0.58,headR*1.5,headR*0.2,0,0,TAU); ctx.fill();
-    ctx.fillRect(hcx-headR*0.72, headCY-headR*1.78, headR*1.44, headR*1.22);
+  if(hat==='top'){ // 高顶礼帽（福尔摩斯）：微倾+软边圆筒（随呼吸轻晃）
+    const hy0=headCY-headR*0.55;
+    const tilt=(o.t!==undefined)?0.06+0.015*Math.sin(o.t*0.9):0.05;
+    ctx.save();
+    ctx.translate(hcx,hy0); ctx.rotate(tilt);
+    ctx.beginPath(); ctx.ellipse(0,0,headR*1.48,headR*0.2,0,0,TAU); ctx.fill();
+    const tw=headR*0.64, bw=headR*0.74, th=headR*1.22;
+    ctx.beginPath();
+    ctx.moveTo(-bw,0);
+    ctx.lineTo(-tw,-th+headR*0.12);
+    ctx.quadraticCurveTo(-tw,-th, -tw+headR*0.12,-th);
+    ctx.lineTo(tw-headR*0.12,-th);
+    ctx.quadraticCurveTo(tw,-th, tw,-th+headR*0.12);
+    ctx.lineTo(bw,0);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
   }else if(hat==='bowler'){ // 圆顶硬礼帽（华生）：圆顶+窄檐
     ctx.beginPath(); ctx.ellipse(hcx,headCY-headR*0.42,headR*1.26,headR*0.15,0,0,TAU); ctx.fill();
     ctx.beginPath(); ctx.ellipse(hcx,headCY-headR*0.5,headR*0.95,headR*0.72,0,Math.PI,TAU); ctx.fill();
@@ -211,22 +224,33 @@ function humanoid(ctx,o){
   }
   if(o.pipe && (pose==='stand'||pose==='sit'||pose==='walk')){
     const mx=shX*1.3+headR*0.9, my=headCY+headR*0.5;
-    // 弯柄烟斗：细柄自嘴角弧线下探，烟锅朝上悬在颚前（英伦绅士标配）
-    ctx.lineWidth=lw*0.42;
+    // 参考款弯斗烟斗：圆润烟斗杯 + S 形烟管 + 烟锅升起 S 形烟丝
+    const bxl=mx+0.035*h, byt=my+0.075*h;
+    ctx.lineWidth=lw*0.4;
     ctx.beginPath(); ctx.moveTo(mx,my);
-    ctx.quadraticCurveTo(mx+0.075*h, my+0.02*h, mx+0.095*h, my+0.085*h);
+    ctx.quadraticCurveTo(mx+0.06*h, my-0.01*h, bxl+0.045*h, byt);
     ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(mx+0.108*h, my+0.128*h, h*0.024, h*0.034, 0.12, 0, TAU); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(bxl, byt);
+    ctx.quadraticCurveTo(bxl-0.02*h, byt+0.05*h, bxl+0.005*h, byt+0.075*h);
+    ctx.quadraticCurveTo(bxl+0.03*h, byt+0.09*h, bxl+0.055*h, byt+0.07*h);
+    ctx.quadraticCurveTo(bxl+0.07*h, byt+0.05*h, bxl+0.05*h, byt);
+    ctx.closePath(); ctx.fill();
     if(o.smoke&&o.t!==undefined){
-      const bxp=mx+0.108*h, byp=my+0.085*h;
-      for(let i=0;i<3;i++){
-        const k=(o.t*0.3+i*0.34)%1;
-        const px=bxp+Math.sin(o.t*1.8+i*2.1)*0.016*h;
-        const py=byp-k*0.17*h;
-        ctx.fillStyle=`rgba(185,235,205,${(0.11*(1-k)).toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(px,py,(0.007+0.022*k)*h,0,TAU); ctx.fill();
+      const bxp=bxl+0.025*h, byp=byt-0.01*h;
+      ctx.lineWidth=1.6;
+      for(let wsm=0; wsm<2; wsm++){
+        ctx.strokeStyle=`rgba(185,235,205,${(0.16-wsm*0.06).toFixed(3)})`;
+        ctx.beginPath();
+        for(let k=0;k<=20;k++){
+          const kk=k/20;
+          const px=bxp+Math.sin(kk*9+t*1.6+wsm*2.5)*0.02*h*(1-kk*0.4)+kk*0.01*h;
+          const py=byp-kk*0.22*h;
+          k?ctx.lineTo(px,py):ctx.moveTo(px,py);
+        }
+        ctx.stroke();
       }
-      ctx.fillStyle=c;
+      ctx.lineWidth=lw*0.4; ctx.fillStyle=c;
     }
   }
   if(o.cane && pose!=='lie'){

@@ -33,6 +33,7 @@ js/acts/*.js        序幕 + 第一~六幕 + 尾声（每幕 = 广告牌{b,en,w}
 - **中英双语**：`subs`（中文）打字机逐字浮现；打完后 `subsEn`（英文）淡入副行。广告牌 `b`+`en` 双语正文。
 - **镜头语言**：beat 可带 `cam:[[t,lookX,lookY,zoom],...]` 关键帧，引擎 smoothstep 插值 lookAt+zoom，渲染时 `translate(640,360)/scale(z)/translate(-lx,-ly)`（场景与雾都在镜头空间，vignette 之外）。**约束：lookAt 必须在 [640/z,1280-640/z]×[360/z,720-360/z] 内，越界会露出场景外黑边**。对话镜头保持静机位，动镜头只在 8 个关键镜头（序幕/1-1/1-5/2-0/3-3/4-3/5-3/6-5）。
 - **画面精修层（v2.7）**：① 体积光 `Fx.lightCone(ctx,ax,apexY,w0,baseY,w1,color,alpha)`（screen 叠加，7 处接入）；② 接触阴影 humanoid `groundShadow:true`（preset 默认开，影子副本 false）；③ 呼吸/重心微移用 `o.t`（不传 t 则静止）；④ 烟斗烟 `smoke:true`+`t`（无状态飘散圈）；⑤ 情绪色调呼吸 render 按 `AudioSys._mood` 叠 screen 色调；⑥ 粉笔书写 `Fx.chalkStroke/chalkPartial`+笔画数据（4-3 Rache，每字母 grind 刮擦）。
+⑦ 英伦剪影 hat 系统：`hat:'top'`（圆筒+帽檐）/`hat:'bowler'`（圆顶+窄檐）/`hair:'long'` 长发，弯柄烟斗（弧线柄+烟锅上悬+烟自锅起）、维多利亚领巾（领结+双垂尾）；广告牌诡谲风：斜体墨绿+首字下沉+绿渍纸面（style.css 的 #adPaper/#adHead/#adBody::first-letter/#adWarn）。
 - **资源缓存**：index.html 资源引用带 `?v=26`；改 js/css 后需 bump 版本参数（或用 bump_ver.py），否则浏览器磁盘缓存抱旧文件不放（server 已加 Cache-Control:no-store 双保险）。
 - **中文配音（三引擎）**：`配音:XX ▾` 下拉菜单。**我的声音**：`VoiceMine` 录音工作台（"🎙 录我的"按钮），103 句逐句录制（MediaRecorder+静音 1.7s 自动停），IndexedDB `greenblood_v1/takes` 持久化，key=`a{幕}b{拍}s{行}`；未录句静默+字幕照常。**神经引擎**：14 个 Edge 神经声分两组（标准 6 + 方言港台 8）经 `server.py /tts` 播 mp3，预取下一句零延迟。**本机引擎**：speechSynthesis 离线声。任一失败无缝回退。"语速:慢/中/快"两引擎各自映射。录制工作台打开时会静音环境音、关自动播放，关闭后恢复。
 - **四下敲门**：`AudioSys.knock4(onEach,onDone)` 一声一停 0.85s，每声触发 `Engine.doShake(3.4)`；序幕一次、贝克街一次（威金斯送信）、第六幕一次（呼应"四下，不多不少"）。
