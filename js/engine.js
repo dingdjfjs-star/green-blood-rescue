@@ -350,7 +350,7 @@ const Engine = {
 
   fadeOut(cb){ this.fadeDir=1; this.fadeCb=cb; },
   fadeIn(){ this.fadeDir=-1; },
-  doShake(p){ this.shake=Math.max(this.shake,p); },
+  doShake(p){ this.shake=Math.max(this.shake,p); this._shakeT=0.12; },   // 冲击式：震一拍后硬归零
 
   /* ---------- 录音工作台 ---------- */
   allLines(){
@@ -524,8 +524,12 @@ const Engine = {
         const cb=this.fadeCb; this.fadeCb=null; if(cb)cb(); }
       if(this.fadeDir<0&&this.fadeA<=0){ this.fadeA=0; this.fadeDir=0; }
     }
-    this.shake*=Math.pow(0.02,dt);
-    if(this.shake<0.05) this.shake=0;
+    // 冲击式震动：0.12s 内急速衰减后硬归零——“震一下空一下”
+    if(this._shakeT>0){
+      this._shakeT-=dt;
+      this.shake*=Math.pow(0.05,dt);
+      if(this._shakeT<=0){ this.shake=0; this._shakeT=0; }
+    }else if(this.shake>0){ this.shake=0; }
     this.tickExport(dt);
   },
   render(){
