@@ -163,23 +163,14 @@ function humanoid(ctx,o){
   // 头（椭圆，避免正圆的"鸡蛋"感）
   const hcx=shX*1.3;
   ctx.beginPath(); ctx.ellipse(hcx,headCY,headR*0.92,headR*1.08,0,0,TAU); ctx.fill();
-  // 发型（剪影语言：头顶的形状差异）
-  const hair=o.hair;
-  if(hair==='short'){ // 军式短发：贴头皮的平顶
-    ctx.beginPath();
-    ctx.ellipse(hcx,headCY-headR*0.28,headR*0.98,headR*0.82,0,Math.PI,TAU);
-    ctx.fill();
-    ctx.beginPath(); ctx.ellipse(hcx-headR*0.95,headCY,headR*0.18,headR*0.5,0,0,TAU); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(hcx+headR*0.95,headCY,headR*0.18,headR*0.5,0,0,TAU); ctx.fill();
-  }else if(hair==='messy'){ // 微乱中发：三个鼓包+侧延
-    ctx.beginPath();
-    ctx.moveTo(hcx-headR*1.02,headCY+headR*0.15);
-    ctx.quadraticCurveTo(hcx-headR*1.25,headCY-headR*0.7, hcx-headR*0.5,headCY-headR*1.02);
-    ctx.quadraticCurveTo(hcx-headR*0.1,headCY-headR*1.38, hcx+headR*0.45,headCY-headR*1.0);
-    ctx.quadraticCurveTo(hcx+headR*1.05,headCY-headR*0.85, hcx+headR*1.05,headCY-headR*0.1);
-    ctx.quadraticCurveTo(hcx+headR*0.9,headCY-headR*0.5, hcx+headR*0.2,headCY-headR*0.55);
-    ctx.quadraticCurveTo(hcx-headR*0.6,headCY-headR*0.6, hcx-headR*1.02,headCY+headR*0.15);
-    ctx.closePath(); ctx.fill();
+  // 头顶英伦风：高顶礼帽/圆顶礼帽（维多利亚绅士标配），或及肩长发
+  const hat=o.hat, hair=o.hair;
+  if(hat==='top'){ // 高顶礼帽（福尔摩斯）：帽檐+圆筒
+    ctx.beginPath(); ctx.ellipse(hcx,headCY-headR*0.58,headR*1.5,headR*0.2,0,0,TAU); ctx.fill();
+    ctx.fillRect(hcx-headR*0.72, headCY-headR*1.78, headR*1.44, headR*1.22);
+  }else if(hat==='bowler'){ // 圆顶硬礼帽（华生）：圆顶+窄檐
+    ctx.beginPath(); ctx.ellipse(hcx,headCY-headR*0.42,headR*1.26,headR*0.15,0,0,TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(hcx,headCY-headR*0.5,headR*0.95,headR*0.72,0,Math.PI,TAU); ctx.fill();
   }else if(hair==='long'){ // 及肩长发：两侧垂落
     ctx.beginPath();
     ctx.moveTo(hcx-headR*1.05,headCY+headR*0.6);
@@ -196,34 +187,44 @@ function humanoid(ctx,o){
     ctx.rect(shX*1.3-headR*0.85, headCY+headR*0.62, headR*1.7, headR*0.55);
     ctx.fill();
   }
-  if(o.scarf){ // 顾问侦探的围巾：颈后飘带随时间摆动
-    const nx=shX*1.3;
-    const ft=(o.t!==undefined)?Math.sin(o.t*2.3)*headR*0.35:0;
+  if(o.scarf){ // 维多利亚领巾：领结+胸前双垂尾（轻摆）
+    const nx=shX*1.3, ny=headCY+headR*1.12;
+    const sw=(o.t!==undefined)?Math.sin(o.t*1.8)*headR*0.12:0;
     ctx.beginPath();
-    ctx.moveTo(nx-headR*0.55, headCY+headR*0.8);
-    ctx.quadraticCurveTo(nx-headR*1.5+ft, headCY+headR*1.5, nx-headR*1.15+ft*0.6, shY+h*0.14);
-    ctx.lineTo(nx-headR*0.15, shY+h*0.12);
-    ctx.quadraticCurveTo(nx+headR*0.25, headCY+headR*1.1, nx+headR*0.5, headCY+headR*0.8);
+    ctx.moveTo(nx-headR*0.45, ny-headR*0.25);
+    ctx.lineTo(nx, ny);
+    ctx.lineTo(nx+headR*0.45, ny-headR*0.25);
+    ctx.lineTo(nx, ny+headR*0.4);
     ctx.closePath(); ctx.fill();
+    ctx.lineWidth=headR*0.38;
+    ctx.beginPath(); ctx.moveTo(nx, ny+headR*0.3);
+    ctx.quadraticCurveTo(nx-headR*0.3+sw, ny+headR*0.95, nx-headR*0.24+sw*1.5, ny+headR*1.55);
+    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(nx, ny+headR*0.3);
+    ctx.quadraticCurveTo(nx+headR*0.34+sw*0.7, ny+headR*1.05, nx+headR*0.3+sw*1.3, ny+headR*1.65);
+    ctx.stroke();
+    ctx.lineWidth=lw*0.5;
   }
   if(o.cap){ // 扁帽
     ctx.beginPath(); ctx.arc(shX*1.3,headCY-headR*0.35,headR*1.06,Math.PI,TAU); ctx.fill();
     ctx.beginPath(); ctx.ellipse(shX*1.3,headCY-headR*0.36,headR*1.25,headR*0.22,0,0,TAU); ctx.fill();
   }
   if(o.pipe && (pose==='stand'||pose==='sit'||pose==='walk')){
-    const mx=shX*1.3+headR*0.85, my=headCY+headR*0.28;
-    ctx.lineWidth=lw*0.5;
-    ctx.beginPath(); ctx.moveTo(mx,my); ctx.lineTo(mx+0.07*h,my+0.015*h); ctx.stroke();
-    ctx.beginPath(); ctx.arc(mx+0.085*h,my+0.02*h,h*0.022,0,TAU); ctx.fill();
+    const mx=shX*1.3+headR*0.9, my=headCY+headR*0.5;
+    // 弯柄烟斗：细柄自嘴角弧线下探，烟锅朝上悬在颚前（英伦绅士标配）
+    ctx.lineWidth=lw*0.42;
+    ctx.beginPath(); ctx.moveTo(mx,my);
+    ctx.quadraticCurveTo(mx+0.075*h, my+0.02*h, mx+0.095*h, my+0.085*h);
+    ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(mx+0.108*h, my+0.128*h, h*0.024, h*0.034, 0.12, 0, TAU); ctx.fill();
     if(o.smoke&&o.t!==undefined){
-      glow(ctx,mx+0.085*h,my+0.02*h,h*0.05,'rgba(180,255,200,$A)',0.10+0.06*Math.sin(o.t*7));
-      // 烟斗烟：无状态飘散圈
+      const bxp=mx+0.108*h, byp=my+0.085*h;
       for(let i=0;i<3;i++){
         const k=(o.t*0.3+i*0.34)%1;
-        const px=mx+0.09*h+Math.sin(o.t*1.8+i*2.1)*0.014*h;
-        const py=my+0.01*h-k*0.16*h;
-        ctx.fillStyle=`rgba(185,235,205,${(0.12*(1-k)).toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(px,py,(0.006+0.02*k)*h,0,TAU); ctx.fill();
+        const px=bxp+Math.sin(o.t*1.8+i*2.1)*0.016*h;
+        const py=byp-k*0.17*h;
+        ctx.fillStyle=`rgba(185,235,205,${(0.11*(1-k)).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(px,py,(0.007+0.022*k)*h,0,TAU); ctx.fill();
       }
       ctx.fillStyle=c;
     }
@@ -347,8 +348,8 @@ function rat(ctx,o){
 
 /* 角色预设 */
 const Chars = {
-  holmes(ctx,snap,o){ humanoid(ctx,{h:280,coatW:1.18,pipe:true,hair:'messy',scarf:true,groundShadow:true,...snap,...o}); },
-  watson(ctx,snap,o){ humanoid(ctx,{h:252,cane:true,coatW:1.0,hair:'short',collar:true,groundShadow:true,...snap,...o}); },
+  holmes(ctx,snap,o){ humanoid(ctx,{h:280,coatW:1.18,pipe:true,hat:'top',scarf:true,groundShadow:true,...snap,...o}); },
+  watson(ctx,snap,o){ humanoid(ctx,{h:252,cane:true,coatW:1.0,hat:'bowler',collar:true,groundShadow:true,...snap,...o}); },
   wiggins(ctx,snap,o){ humanoid(ctx,{h:170,cap:true,coatW:0.85,groundShadow:true,...snap,...o}); },
   prince(ctx,snap,o){ humanoid(ctx,{h:262,coatW:0.78,hair:'long',groundShadow:true,...snap,...o}); },
   rat(ctx,snap,o){ rat(ctx,{h:34,...snap,...o}); },

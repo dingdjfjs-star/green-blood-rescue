@@ -84,19 +84,23 @@ html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;
   justify-content:center;z-index:25;background:rgba(0,0,0,.96);cursor:pointer;}
 #adCard.show{display:flex;}
 #adPaper{width:700px;max-width:88%;background:
-  radial-gradient(ellipse at 18% 12%,rgba(90,70,40,.14),transparent 42%),
-  radial-gradient(ellipse at 85% 90%,rgba(70,60,30,.18),transparent 40%),
+  radial-gradient(ellipse at 82% 16%,rgba(70,140,100,.12),transparent 48%),
+  radial-gradient(ellipse at 8% 88%,rgba(60,120,90,.14),transparent 42%),
   radial-gradient(ellipse at 55% 45%,rgba(255,250,230,.25),transparent 60%),#d8cfae;
-  color:#2a2318;padding:44px 52px 30px;transform:rotate(-.6deg);
-  box-shadow:0 18px 70px rgba(0,0,0,.85),inset 0 0 60px rgba(120,95,50,.22);
-  border:1px solid #a89870;outline:4px double #a89870;outline-offset:-14px;}
-#adHead{font-size:24px;font-weight:bold;letter-spacing:.08em;text-align:center;
+  color:#2c3527;padding:44px 52px 30px;transform:rotate(-.8deg);
+  box-shadow:0 18px 70px rgba(0,0,0,.85),inset 0 0 70px rgba(40,110,70,.18);
+  border:1px solid #a89870;outline:4px double #7a8a70;outline-offset:-14px;}
+#adHead{font-size:25px;font-weight:bold;font-style:italic;letter-spacing:.14em;text-align:center;
+  color:#173f30;text-shadow:0 1px 0 rgba(255,255,240,.45),0 0 14px rgba(60,150,100,.25);
   border-bottom:2px solid #4a3d26;padding-bottom:12px;margin-bottom:16px;}
-#adBody{font-size:17px;line-height:1.9;text-align:justify;}
-#adBodyEn{font-size:12.5px;line-height:1.55;margin-top:12px;color:rgba(62,52,32,.72);
+#adBody{font-size:17px;line-height:1.9;text-align:justify;font-style:italic;color:#2c3a2c;}
+#adBody::first-letter{float:left;font-size:3.2em;line-height:.85;padding:4px 10px 0 0;
+  color:#1d5c3f;font-weight:bold;text-shadow:0 0 10px rgba(60,150,100,.35);}
+#adBodyEn{font-size:12.5px;line-height:1.55;margin-top:12px;color:rgba(58,84,58,.75);
   font-style:italic;text-align:justify;}
-#adWarn{margin-top:16px;padding-top:10px;border-top:1px dashed #8a7a55;
-  color:#1d5c3f;font-style:italic;font-size:15px;}
+#adWarn{margin-top:16px;padding-top:10px;border-top:1px dashed #6e8a70;
+  color:#14532d;font-style:italic;font-weight:bold;font-size:15px;letter-spacing:.05em;
+  text-shadow:0 0 8px rgba(60,150,100,.3);}
 #adHint{text-align:center;margin-top:18px;color:#6b5b3e;font-size:13px;letter-spacing:.3em;
   animation:pulse 1.8s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:.35}50%{opacity:.9}}
