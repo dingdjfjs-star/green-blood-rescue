@@ -224,6 +224,12 @@ const Engine = {
   /* ---------- 推进 ---------- */
   advance(){
     if(this._exporting) return;   // 导出录制期间屏蔽手动推进
+    // 渲染心跳停摆（后台冻结）时：同步驱动状态机走完当前步（打字/淡出），
+    // 保证任何环境下“点击即推进”；前台 rAF 活跃时此分支不触发
+    if(performance.now()-this._rafAlive>400){
+      let guard=120;
+      while((this.typing||this.fadeDir!==0||this.fadeA>0)&&guard-->0){ this.update(0.05); }
+    }
     AudioSys.ensure();
     if(this.state==='ad'){ this.closeAd(); return; }
     if(this.state!=='play') return;
@@ -518,7 +524,7 @@ const Engine = {
         const cb=this.fadeCb; this.fadeCb=null; if(cb)cb(); }
       if(this.fadeDir<0&&this.fadeA<=0){ this.fadeA=0; this.fadeDir=0; }
     }
-    this.shake*=Math.pow(0.002,dt);
+    this.shake*=Math.pow(0.02,dt);
     if(this.shake<0.05) this.shake=0;
     this.tickExport(dt);
   },
