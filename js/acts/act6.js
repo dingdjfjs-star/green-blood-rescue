@@ -246,7 +246,6 @@ Engine.register({
           '<div class="line">绿血的拯救</div>'+
           '<div class="dim">The Salvation of Green Blood · A side story to Neil Gaiman\'s <i>A Study in Emerald</i></div>'+
           '<div class="line" style="margin-top:18px">原作者</div>'+
-          '<div class="dim"> · 学号 </div>'+
           '<div class="dim" style="margin-top:14px">动画改编 · 分镜与代码 · ZCode</div>'+
           '<button id="btnAgain">再 看 一 遍</button>';
         cr.classList.add('show');

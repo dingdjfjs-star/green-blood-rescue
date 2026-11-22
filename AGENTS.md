@@ -61,6 +61,7 @@ js/acts/*.js        序幕 + 第一~六幕 + 尾声（每幕 = 广告牌{b,en,w}
 10. **edge-tts 合成是网络调用**：首次合成一句约 0.5-2s，`tts_cache/` 哈希缓存后零延迟；server 对 502 返回文本，前端 `a.onerror` 自动回退本机声源。
 11. **服务器进程管理（重要）**：不要用 ZCode 会话内后台任务（run_in_background）长驻 server.py——会被宿主环境**静默终止**（exit 1、日志无报错）。正解：`start "GreenBloodTTS" /min run-server.bat` 分离出独立最小化窗口，`run-server.bat` 里 `:loop → python → goto loop` 做守护自愈；`启动.bat` 走同一路径。
 12. **Windows 客户端断连**：浏览器切后台/重载会掐断进行中的响应，`wfile.write` 抛 `ConnectionAbortedError(10053)`；必须在 `handle_one_request` 和 `do_GET` 层吞掉，否则线程异常刷屏甚至拖垮进程。
+13. **部署前敏感信息扫描（血泪）**：作品致谢卡里的作者姓名/学院班级/学号被一并公开上传——部署前必须扫描所有待传文件，姓名/学号/班级/邮箱/路径等一律视为待授权个人信息，未经用户明确点头不出本地；事故处置顺序=转私有→公开面清名→历史强制替换→文件清洗（全过程见 STATUS.md 隐私事故节）
 
 ## 扩展指南
 
